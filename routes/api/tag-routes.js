@@ -29,6 +29,8 @@ router.get('/:id', async (req, res) => {
     if(!tagData) {
       res.status(404).json({message: 'No tag data found with this ID'});
     }
+    res.status(200).json(tagData);
+
   } catch (err) {
     res.status(500).json(err);
   }
@@ -51,12 +53,12 @@ router.post('/', async (req, res) => {
 router.put('/:id', (req, res) => {
   Tag.update(                     
   {
-    id: req.body.id,
+    id: req.params.id,
     tag_name: req.body.tag_name,    
   },
   {
     where: {
-      id: req.body.id,
+      id: req.params.id,
     },
   }
 ).then((updatedTag) => {

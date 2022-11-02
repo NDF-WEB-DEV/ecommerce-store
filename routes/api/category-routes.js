@@ -46,30 +46,31 @@ router.post('/', async (req, res) => {
 });
 
 // UPDATE CATEGORY BY ID
-router.put('/:id', async (req, res) => {
-  try {
-    const categoryData = await Category.update({
-      where: {
-        id: req.paramns.id
+router.put('/:id', (req, res) => {
+ Category.update(
+      {
+        category_name: req.body.category_name,
       }
+     ,
+     {
+      where: {
+        id: req.params.id,
+      }
+     } 
+    ).then((updateCategory) => {
+      res.json(updateCategory);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.json(err);
     });
-    if(!categoryData) {
-      res.status(404).json({message: 'Update failed'});
-      return;
-    }
-    res.status(200).json(categoryData);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
+  });
 
 // DELETE CATEGORY BY ID
 router.delete('/:id', async (req, res) => {
   try {
     const categoryData = await Category.destroy({
-      where: {
-        id: req.params.id
-      }
+      where: {id: req.params.id}
     });
     if(!categoryData) {
       res.status(404).json({message: 'Update failed'});
