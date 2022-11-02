@@ -2,12 +2,13 @@ const router = require('express').Router();
 const { Product, Category, Tag, ProductTag } = require('../../models');
 
 // The `/api/products` endpoint
-
-// GET ALL PRODUCTS
+// GET REQUEST - ALL PRODUCTS
 // be sure to include its associated Category and Tag data
 router.get('/', async (req, res) => {
   try {
-    const productData = await Product.findAll();   // find all products
+    const productData = await Product.findAll({
+      include: [{model: Category},{model: Tag}],
+    });
     res.status(200).json(productData);
   } catch (err) {
     res.status(500).json(err);
@@ -20,7 +21,8 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const productData = await Product.findByPk(req.params.id, {
-      include: [{model: Product, through: ProductTag, as: 'product_tags'}]
+      // include: [{model: ProductTag}],
+      // include: [{model: Tag, through: ProductTag}],
     });
     if(!productData) {
       res.status(404).json({message: 'Product not found with this ID'});
@@ -41,17 +43,15 @@ router.get('/:id', async (req, res) => {
     }
   */
 router.post('/', async (req, res) => {
-  // try {
-  //   const productData = await Product.create(req.body,{
-  //     product_name: req.body.product_name,
-  //     price: req.body.price,
-  //     stock: req.body.stock,
-  //     tagIds: req.body.tag_id
-  //   })
-  // }
-  Product.create(req.body)
-    .then((product) => {
-      // if there's product tags, we need to create pairings to bulk create in the ProductTag model
+  Product.create({  //req.body fetch call 
+    product_name: req.body.product_name,
+    price: req.body.price,
+    stock: req.body.stock,
+    category_id: req.body.category_id,
+    tagIds: req.body.tag_id
+  }).then((product) => {
+      // if there's product tags, we need to create pairings 
+      // to bulk create in the ProductTag model
       if (req.body.tagIds.length) {
         const productTagIdArr = req.body.tagIds.map((tag_id) => {
           return {
@@ -59,7 +59,7 @@ router.post('/', async (req, res) => {
             tag_id,
           };
         });
-        return ProductTag.bulkCreate(productTagIdArr);
+        return ProductTag.bulkCreate(productTagIdArr);  //method to allow creating multiple records at once, with only one query
       }
       // if no product tags, just respond
       res.status(200).json(product);
@@ -72,8 +72,8 @@ router.post('/', async (req, res) => {
 });
 
 // UPDATE PRODUCT
+// update product data
 router.put('/:id', (req, res) => {
-  // update product data
   Product.update(req.body, {
     where: {
       id: req.params.id,
