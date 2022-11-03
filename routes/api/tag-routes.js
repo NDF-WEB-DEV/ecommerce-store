@@ -62,8 +62,10 @@ router.put('/:id', (req, res) => {
     },
   }
 ).then((updatedTag) => {
-  res.json(updatedTag);  // send the updated tag as a JSON response
-}).catch((err) => res.json(err));
+  res.status(200).json(updatedTag); // send the updated tag as a JSON response
+}).catch((err) => {
+  res.status(400).json(err);
+})
 });
 
 //DELETE REQUEST - delete on tag by its `id` value
